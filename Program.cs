@@ -2,10 +2,11 @@ using backend.Hubs;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
+string[] origins = { "http://localhost:5000", "https://localhost:5001" };
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policyBuilder => policyBuilder
-        .WithOrigins("http://localhost:4200")
+        .WithOrigins(origins)
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials());
@@ -15,21 +16,17 @@ builder.Services.AddControllers();
 
 // Configure the HTTP request pipeline.
 var app = builder.Build();
+
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
-app.UseAuthorization();
-app.UseDefaultFiles();
-app.UseStaticFiles();
 app.UseRouting();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+app.UseEndpoints(endpoints =>
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+    endpoints.MapHub<ChatHub>("/chat");
+    endpoints.MapControllers();
+    endpoints.MapFallbackToFile("/index.html");
+});
 
-app.MapControllers();
-app.MapHub<ChatHub>("/chat");
+app.UseStaticFiles();
 app.Run();
