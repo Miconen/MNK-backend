@@ -2,7 +2,7 @@ using backend.Hubs;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
-string[] origins = { "http://localhost:5000", "https://localhost:5001" };
+string[] origins = { "http://localhost:8080", "https://localhost:8081" };
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policyBuilder => policyBuilder
