@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
 
 namespace backend.Hubs;
 
@@ -13,6 +12,7 @@ public class ChatHub : Hub
 
     public async Task SendMessageToGroup(string user, string message, string groupName)
         => await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);    
+
     public async void JoinGroup(string user, string roomName)
     {
         await Clients.Group(roomName).SendAsync("ReceiveMessage", user, "joined to " + roomName).ConfigureAwait(true);
