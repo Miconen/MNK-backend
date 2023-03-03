@@ -1,4 +1,6 @@
 using backend.Hubs;
+using backend.Data;
+using Microsoft.EntityFrameworkCore;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +13,10 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowCredentials());
 });
-builder.Services.AddSignalR();
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddDbContext<DatabaseContext>(options => 
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseContext")));
 
 // Configure the HTTP request pipeline.
 var app = builder.Build();
@@ -23,7 +27,7 @@ app.UseRouting();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapHub<ChatHub>("/chat");
+    endpoints.MapHub<ChatHub>("/api/hub/chat");
     endpoints.MapControllers();
     endpoints.MapFallbackToFile("/index.html");
 });
