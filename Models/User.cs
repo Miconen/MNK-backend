@@ -7,6 +7,12 @@ namespace backend.Models;
 [Table("Users")]
 public class User
 {
+    public User (string name, string password)
+    {
+        Name = name;
+        Password = password;
+    }
+
     public int Id { get; set; }
     [Required]
     [StringLength(12)]
