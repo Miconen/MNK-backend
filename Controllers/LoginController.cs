@@ -19,7 +19,7 @@ public class LoginController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public IActionResult Login([FromForm] Login login)
+    public IActionResult Login([FromForm] AuthRequest login)
     {
         // Check if post request has correct parameters
         bool NO_NAME = string.IsNullOrWhiteSpace(login.Name);
