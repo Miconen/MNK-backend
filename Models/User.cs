@@ -7,7 +7,7 @@ namespace backend.Models;
 [Table("Users")]
 public class User
 {
-    public User (string name, string password)
+    public User(string name, string password)
     {
         Name = name;
         Password = password;
@@ -20,7 +20,9 @@ public class User
     [Required]
     [StringLength(12)]
     public string? Password { get; set; }
+    [Required]
     [StringLength(8)]
     [DefaultValue("user")]
-    public string? Role{ get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public string? Role { get; set; } = "user";
 }
