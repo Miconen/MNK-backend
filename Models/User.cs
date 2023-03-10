@@ -15,10 +15,10 @@ public class User
 
     public int Id { get; set; }
     [Required]
-    [StringLength(12)]
+    [StringLength(16)]
     public string? Name { get; set; }
     [Required]
-    [StringLength(12)]
+    [StringLength(64)]
     public string? Password { get; set; }
     [Required]
     [StringLength(8)]
