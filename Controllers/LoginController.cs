@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 
+using BCrypt.Net;
+
 [Route("api/[Controller]")]
 [Route("api/[Controller]/[action]")]
 [ApiController]
@@ -21,34 +23,36 @@ public class LoginController : ControllerBase
     [Route("")]
     public IActionResult Login([FromForm] AuthRequest login)
     {
+        var errors = new List<string>();
+
         // Check if post request has correct parameters
-        bool NO_NAME = string.IsNullOrWhiteSpace(login.Name);
-        bool NO_PASSWORD = string.IsNullOrWhiteSpace(login.Password);
-        if (NO_NAME || NO_PASSWORD) return Ok(new { status = "Invalid post parameters" });
-
-        // Check claims
-        /* if (!authService.IsTokenValid(token)) */
-        /*     throw new UnauthorizedAccessException(); */
-        /* else */
-        /* { */
-        /*     List<Claim> claims = authService.GetTokenClaims(token).ToList(); */
-        /*     Console.WriteLine(claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.Name)).Value); */
-        /* } */
-
-        User? query = this._context.Users.Where(user => user.Name == login.Name && user.Password == login.Password).FirstOrDefault<User>();
-        bool loggedIn;
-        try
+        if (string.IsNullOrWhiteSpace(login.Name))
         {
-            loggedIn = query.Password == login.Password;
+            errors.Add("Name field cannot be empty");
         }
-        catch (NullReferenceException)
+        if (string.IsNullOrWhiteSpace(login.Password))
         {
-            loggedIn = false;
+            errors.Add("Password field cannot be empty");
         }
-        if (!loggedIn) return Ok(new { status = "Invalid credentials" });
+
+        if (errors.Count > 0)
+        {
+            return BadRequest(new { status = "Error", errors = errors });
+        }
+
+        var query = this._context.Users
+            .Where(user => user.Name == login.Name)
+            .Select(user => new { user.Name, user.Password, user.Role })
+            .FirstOrDefault();
+
+        if (query == null || !BCrypt.EnhancedVerify(login.Password, query.Password))
+        {
+            errors.Add("Invalid credentials");
+            return BadRequest(new { status = "Error", errors = errors });
+        }
 
         // Generate JWT
-        IAuthContainerModel model = JWTService.GetJWTContainerModel(query.Name, query.Role);
+        IAuthContainerModel model = JWTService.GetJWTContainerModel(query.Name!, query.Role ?? "user");
         IAuthService authService = new JWTService(model.SecretKey);
         string token = authService.GenerateToken(model);
 
