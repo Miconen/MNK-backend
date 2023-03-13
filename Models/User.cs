@@ -1,11 +1,6 @@
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿namespace backend.Models;
 
-namespace backend.Models;
-
-[Table("Users")]
-public class User
+public partial class User
 {
     public User(string name, string password)
     {
@@ -13,16 +8,11 @@ public class User
         Password = password;
     }
 
-    public int Id { get; set; }
-    [Required]
-    [StringLength(16)]
-    public string? Name { get; set; }
-    [Required]
-    [StringLength(64)]
-    public string? Password { get; set; }
-    [Required]
-    [StringLength(8)]
-    [DefaultValue("user")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public string? Role { get; set; } = "user";
+    public string Name { get; set; } = null!;
+
+    public string Password { get; set; } = null!;
+
+    public string Role { get; set; } = "user";
+
+    public virtual ICollection<Message> Messages { get; } = new List<Message>();
 }
