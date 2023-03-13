@@ -66,15 +66,8 @@ public class JWTService : IAuthService
 
         JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
 
-        try
-        {
-            ClaimsPrincipal tokenValid = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
-            return tokenValid.Claims;
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
+        ClaimsPrincipal tokenValid = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+        return tokenValid.Claims;
     }
 
     public static JWTContainerModel GetJWTContainerModel(string name, string role)
