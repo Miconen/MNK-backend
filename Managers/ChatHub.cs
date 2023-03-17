@@ -50,6 +50,5 @@ public class ChatHub : Hub
         if (!authService.IsTokenValid(chat.JWT)) return;
 
         await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"left {chat.Roomname}").ConfigureAwait(true);
-
     }
 }
