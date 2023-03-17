@@ -37,7 +37,7 @@ public class ChatHub : Hub
 
         if (!authService.IsTokenValid(chat.JWT)) return;
 
-        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"joined to {chat.Roomname}").ConfigureAwait(true);
+        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"joined the room").ConfigureAwait(true);
     }
 
     public async Task LeaveGroup(ChatEvent chat)
@@ -49,6 +49,6 @@ public class ChatHub : Hub
 
         if (!authService.IsTokenValid(chat.JWT)) return;
 
-        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"left {chat.Roomname}").ConfigureAwait(true);
+        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"left the room").ConfigureAwait(true);
     }
 }
