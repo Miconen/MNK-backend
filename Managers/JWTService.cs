@@ -19,7 +19,7 @@ public class JWTService : IAuthService
     {
 
         if (string.IsNullOrEmpty(token))
-            throw new ArgumentException("Given token is null or empty.");
+            return false;
 
         TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters();
 

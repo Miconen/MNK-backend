@@ -1,27 +1,54 @@
+using backend.Data;
+using backend.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace backend.Managers;
 
 public class ChatHub : Hub
 {
-    public async Task SendMessage(string user, string message)
-        => await Clients.All.SendAsync("ReceiveMessage", user, message);
+    private readonly DatabaseContext _context;
 
-    public async Task SendMessageToCaller(string user, string message)
-        => await Clients.Caller.SendAsync("ReceiveMessage", user, message);
-
-    public async Task SendMessageToGroup(string user, string message, string groupName)
-        => await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);    
-
-    public async void JoinGroup(string user, string roomName)
+    public ChatHub(DatabaseContext context)
     {
-        await Clients.Group(roomName).SendAsync("ReceiveMessage", user, "joined to " + roomName).ConfigureAwait(true);
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
+        _context = context;
     }
-    
-    public async void LeaveGroup(string user, string roomName)
+
+    public async Task SendMessageToGroup(ChatEvent chat)
     {
-        await Clients.Group(roomName).SendAsync("ReceiveMessage", user, " left " + roomName).ConfigureAwait(true);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+        IAuthContainerModel model = JWTService.GetJWTContainerModel(chat.Username, "user");
+        IAuthService authService = new JWTService(model.SecretKey);
+
+        if (!authService.IsTokenValid(chat.JWT)) return;
+
+        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, chat.Content).ConfigureAwait(true);
+
+        // Add new message to database
+        /* Message dbmessage = new Message(); */
+        /* this._context.Messages.Add(dbmessage); */
+        /* this._context.SaveChanges(); */
+    }
+
+    public async Task JoinGroup(ChatEvent chat)
+    {
+        IAuthContainerModel model = JWTService.GetJWTContainerModel(chat.Username, "user");
+        IAuthService authService = new JWTService(model.SecretKey);
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, chat.Roomname);
+
+        if (!authService.IsTokenValid(chat.JWT)) return;
+
+        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"joined to {chat.Roomname}").ConfigureAwait(true);
+    }
+
+    public async Task LeaveGroup(ChatEvent chat)
+    {
+        IAuthContainerModel model = JWTService.GetJWTContainerModel(chat.Username, "user");
+        IAuthService authService = new JWTService(model.SecretKey);
+
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Roomname);
+
+        if (!authService.IsTokenValid(chat.JWT)) return;
+
+        await Clients.OthersInGroup(chat.Roomname).SendAsync("ReceiveMessage", chat.Username, $"left {chat.Roomname}").ConfigureAwait(true);
     }
 }
